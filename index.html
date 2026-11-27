@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Celeb Requirement Brief – WhatsApp Builder</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --bg:#f4f2ee; --card:#fff; --ink:#1d1d1b; --muted:#6b6a66; --line:#e9e6df;
+    --accent:#1f7a5a; --soft:#e6f4ee; --soft-line:#a8d5c2; --wa:#25d366; --wa-dark:#128c7e;
+    --chat:#efeae2; --bubble:#d9fdd3;
+  }
+  *{box-sizing:border-box}
+  body{margin:0;font-family:Inter,system-ui,sans-serif;background:var(--bg);color:var(--ink);font-size:14px}
+  header{padding:20px 24px 4px;max-width:1640px;margin:0 auto}
+  header h1{margin:0;font-size:21px;letter-spacing:-.01em}
+  header p{margin:4px 0 0;color:var(--muted)}
+  .wrap{max-width:1640px;margin:0 auto;padding:14px 24px 40px;display:grid;grid-template-columns:minmax(0,1.9fr) minmax(340px,.8fr);gap:20px;align-items:start}
+  @media (max-width:980px){.wrap{grid-template-columns:1fr}.preview{position:static!important}}
+  .card{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:4px 16px}
+  .line{display:grid;grid-template-columns:175px minmax(0,1fr);gap:14px;padding:10px 0;border-bottom:1px solid var(--line);align-items:center}
+  .line > div:last-child{display:flex;flex-wrap:nowrap;align-items:center;gap:6px;overflow-x:auto;white-space:nowrap;scrollbar-width:thin;padding:2px 0}
+  .line > div:last-child > *{flex:none}
+  .line > div:last-child > input.full{flex:1 1 auto}
+  .line > div[data-g="category"]{flex-wrap:wrap;overflow:visible;row-gap:6px}
+  .line > div.dcell{flex-direction:column;align-items:flex-start;gap:7px}
+  .dcell .drows{flex-direction:column;gap:7px}
+  .dcell .drow + .drow{padding-left:0;border-left:0}
+  .dcell .drow .dl{width:72px}
+  .line > div.stack{flex-direction:column;align-items:flex-start;gap:7px;white-space:normal}
+  .stack > .opts + .opts{margin-left:0;padding-left:0;border-left:0}
+  .stack > .opts > .tag{min-width:96px;font-weight:600;color:var(--ink)}
+  .line:last-child{border-bottom:0}
+  @media (max-width:620px){.line{grid-template-columns:1fr;gap:8px}}
+  .ql{display:flex;gap:8px;align-items:flex-start;font-weight:600;font-size:13.5px;padding-top:6px}
+  .n{flex:none;display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border-radius:50%;background:var(--accent);color:#fff;font-size:11px;margin-top:-2px}
+  .opts{display:flex;flex-wrap:nowrap;gap:5px;align-items:center;flex:none}
+  .opts + .opts{margin-left:10px;padding-left:10px;border-left:1px solid var(--line)}
+  .tag{font-size:12px;color:var(--muted);margin-right:2px}
+  .chip{display:inline-flex;align-items:center;gap:5px;border:1px solid #e0ddd5;border-radius:999px;padding:5px 9px;white-space:nowrap;cursor:pointer;user-select:none;background:#fcfbf9;font-size:13px;line-height:1.2}
+  .chip input{margin:0;accent-color:var(--accent)}
+  .chip:has(input:checked){background:var(--soft);border-color:var(--soft-line)}
+  .drows{display:flex;flex-wrap:nowrap;gap:10px;flex:none}
+  .drow{display:flex;flex-wrap:nowrap;align-items:center;gap:5px;flex:none}
+  .drow + .drow{padding-left:10px;border-left:1px solid var(--line)}
+  .drow .dl{font-size:12.5px;font-weight:600;color:var(--ink);margin-right:2px}
+  .qitem{display:inline-flex;align-items:center;gap:6px;border:1px solid #e0ddd5;border-radius:999px;padding:3px 11px 3px 4px;background:#fcfbf9;font-size:13px}
+  .qitem.on{background:var(--soft);border-color:var(--soft-line)}
+  .qitem select{padding:3px 22px 3px 8px;font-size:12.5px;border-radius:999px;background-position:right 7px center;width:auto}
+  input.cust{width:64px;border-radius:999px;padding:3px 8px;font-size:12.5px}
+  input.names{width:260px;border-radius:999px;padding:6px 11px;font-size:13px}
+  input.extra{width:200px;border-radius:999px;padding:6px 11px;font-size:13px}
+  input[type=date]{cursor:pointer}
+  select,input[type=text],input[type=date],textarea{font:inherit;padding:7px 10px;border:1px solid #e0ddd5;border-radius:9px;background:#fcfbf9;color:var(--ink)}
+  select{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='7' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' stroke='%236b6a66' stroke-width='1.6' fill='none'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;padding-right:28px;cursor:pointer}
+  input[type=text].full,textarea{width:100%}
+  input.oth{width:150px;border-radius:999px;padding:6px 11px;font-size:13px}
+  select:focus,input:focus,textarea:focus{outline:2px solid #bfe3d4;border-color:var(--accent)}
+  textarea{resize:vertical;min-height:44px;line-height:1.4;margin-top:7px}
+  .seg .chip{font-weight:600}
+  .preview{position:sticky;top:16px}
+  .pcard{background:var(--card);border:1px solid var(--line);border-radius:14px;padding:16px}
+  .pcard h2{margin:0 0 12px;font-size:13px;text-transform:uppercase;letter-spacing:.08em;color:var(--accent)}
+  .phone{background:var(--chat);border-radius:14px;border:1px solid var(--line);padding:16px;max-height:66vh;overflow:auto}
+  .bubble{background:var(--bubble);border-radius:8px 0 8px 8px;padding:9px 11px 18px;white-space:pre-wrap;word-wrap:break-word;line-height:1.45;font-size:14px;box-shadow:0 1px .5px rgba(0,0,0,.13);position:relative;margin-left:20px}
+  .bubble .time{position:absolute;right:8px;bottom:4px;font-size:10.5px;color:#667781}
+  .actions{display:flex;gap:8px;margin-top:12px;flex-wrap:wrap}
+  .btn{font:inherit;font-weight:600;border:0;border-radius:10px;padding:11px 14px;cursor:pointer;text-decoration:none;display:inline-flex;align-items:center;gap:8px}
+  .btn-wa{background:var(--wa);color:#fff;flex:1;justify-content:center}
+  .btn-wa:hover{background:var(--wa-dark)}
+  .btn-copy{background:var(--ink);color:#fff}
+  .btn-ghost{background:#fff;border:1px solid var(--line);color:var(--ink)}
+  .status{font-size:12px;color:var(--accent);min-height:16px;margin-top:6px}
+  .meta{font-size:12px;color:var(--muted);margin-top:8px}
+  .topbar{display:flex;gap:8px;justify-content:flex-end;margin-bottom:10px}
+</style>
+</head>
+<body>
+<header>
+  <h1>Celeb Requirement Brief</h1>
+  <p>13 questions. Tick the options next to each one, and the WhatsApp message builds on the right.</p>
+</header>
+
+<div class="wrap">
+  <form id="f" autocomplete="off" onsubmit="return false">
+    <div class="topbar">
+      <button type="button" class="btn btn-ghost" id="loadEx">Load example (Girias)</button>
+      <button type="button" class="btn btn-ghost" id="resetAll">Start fresh</button>
+    </div>
+    <div class="card">
+
+      <div class="line"><div class="ql"><span class="n">1</span>Brand name</div>
+        <div><input type="text" id="brand" class="full" placeholder="e.g. Girias"></div></div>
+
+      <div class="line"><div class="ql"><span class="n">2</span>Brand category</div>
+        <div class="opts" data-g="category" data-type="radio"
+             data-opts="Electronics & home appliances|Real estate|FMCG|BFSI / Fintech|Automobile|Jewellery|Fashion|Beauty & personal care|Food & beverage|Education"
+             data-other="Other category"></div></div>
+
+      <div class="line"><div class="ql"><span class="n">3</span>Campaign medium</div>
+        <div class="opts" data-g="medium" data-type="checkbox" data-opts="Only digital|TVC|ATL|BTL|Print|OOH|Radio"></div></div>
+
+      <div class="line"><div class="ql"><span class="n">4</span>Celeb age</div>
+        <div class="opts" data-g="age" data-type="checkbox" data-opts="Open|18-25|25-35|35-45|45-55|55+"></div></div>
+
+      <div class="line"><div class="ql"><span class="n">5</span>Celeb gender</div>
+        <div class="opts" data-g="gender" data-type="checkbox" data-opts="Male|Female"></div></div>
+
+      <div class="line"><div class="ql"><span class="n">6</span>Number of celebs needed</div>
+        <div class="opts" data-g="count" data-type="radio" data-opts="1|2|3|4|5+" data-other="e.g. 1M + 1F"></div></div>
+
+      <div class="line"><div class="ql"><span class="n">7</span>Deliverables</div>
+        <div class="dcell">
+          <div class="drows" id="items"></div>
+          <input type="text" id="delExtra" class="extra" placeholder="Anything else (optional)">
+        </div></div>
+
+      <div class="line"><div class="ql"><span class="n">8</span>Usage term</div>
+        <div class="stack">
+          <div class="opts"><span class="tag">Costing for:</span><span class="opts" data-g="term" data-type="checkbox" data-opts="1 month|3 months|6 months|1 year|2 years"></span></div>
+          <div class="opts"><span class="tag">Overall duration:</span><span class="tag" style="min-width:0;font-weight:400;color:var(--muted)">exploring</span><span class="opts" data-g="assoc" data-type="checkbox" data-opts="6 months|1 year|2 years"></span></div>
+        </div></div>
+
+      <div class="line"><div class="ql"><span class="n">9</span>Exclusivity</div>
+        <div class="stack">
+          <div class="opts"><span class="tag">Requirement:</span><span class="opts" data-g="exReq" data-type="radio" data-opts="Category exclusivity required|Open to discussion|Not required"></span></div>
+          <div class="opts"><span class="tag">Duration:</span><span class="opts" data-g="exDur" data-type="radio" data-opts="Usage term|6 months|1 year|2 years"></span>
+            <label class="chip"><input type="checkbox" id="exCost">Ask for cost separately</label></div>
+        </div></div>
+
+      <div class="line"><div class="ql"><span class="n">10</span>Timelines</div>
+        <div class="stack">
+          <div class="opts"><span class="tag">Shoot:</span><span class="opts" data-g="shootDate" data-type="radio" data-opts="This month|Next month" data-other="Date"></span></div>
+          <div class="opts"><span class="tag">Posting / airing:</span><span class="opts" data-g="liveDate" data-type="radio" data-opts="This month|Next month" data-other="Date"></span></div>
+        </div></div>
+
+      <div class="line"><div class="ql"><span class="n">11</span>Budget range</div>
+        <div class="opts">₹ <select id="budMin"></select> to <select id="budMax"></select>
+          <span class="opts" data-g="budUnit" data-type="radio" data-opts="lakh|crore"></span>
+          <label class="chip"><input type="checkbox" id="budGst">+ GST</label></div></div>
+
+      <div class="line"><div class="ql"><span class="n">12</span>Reference celebs / kind of names</div>
+        <div class="stack">
+          <div class="opts"><span class="tag">Tier:</span><span class="opts" data-g="tier" data-type="radio" data-opts="Prominent|A-list|Mid-tier|Emerging"></span></div>
+          <div class="opts"><span class="tag">Type:</span><span class="opts" data-g="kind" data-type="checkbox" data-opts="South Indian actor|Bollywood actor|Regional actor|sportsperson|cricketer|TV personality|influencer"></span></div>
+          <div class="opts" style="width:100%"><span class="tag">Names:</span><input type="text" id="names" class="names" style="width:min(620px,100%)" placeholder="Names in mind, separated by commas"></div>
+        </div></div>
+
+      <div class="line"><div class="ql"><span class="n">13</span>Shoot city / location</div>
+        <div class="opts" data-g="loc" data-type="radio" data-opts="Bengaluru|Chennai|Hyderabad|Kochi|Mumbai|Delhi NCR|Not applicable" data-other="Other city"></div></div>
+
+    </div>
+  </form>
+
+  <aside class="preview">
+    <div class="pcard">
+      <h2>WhatsApp preview</h2>
+      <div class="phone"><div class="bubble" id="bubble"></div></div>
+      <div class="actions">
+        <a class="btn btn-wa" id="waBtn" href="#" target="_blank" rel="noopener">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="#fff" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2zm0 18.2c-1.5 0-3-.4-4.3-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2zm4.5-6.1c-.2-.1-1.5-.7-1.7-.8-.2-.1-.4-.1-.6.1l-.8 1c-.1.2-.3.2-.5.1a6.7 6.7 0 0 1-3.3-2.9c-.3-.4.2-.4.7-1.3.1-.2 0-.3 0-.4l-.8-1.8c-.2-.5-.4-.4-.6-.4h-.5c-.2 0-.4.1-.7.3-.2.3-.9.9-.9 2.2s.9 2.5 1 2.7c.1.2 1.8 2.8 4.4 3.9 1.6.7 2.3.8 3.1.6.5-.1 1.5-.6 1.7-1.2.2-.6.2-1.1.1-1.2l-.6-.3z"/></svg>
+          Share on WhatsApp
+        </a>
+        <button type="button" class="btn btn-copy" id="copyBtn">Copy text</button>
+      </div>
+      <div class="status" id="status"></div>
+      <div class="meta">Labels use WhatsApp's *bold* format and show bold once sent. If the share button doesn't open, use Copy text and paste into WhatsApp.</div>
+    </div>
+  </aside>
+</div>
+
+<script>
+const $ = id => document.getElementById(id);
+const form = $("f");
+const escA = s => s.replace(/&/g,"&amp;").replace(/"/g,"&quot;").replace(/</g,"&lt;");
+
+/* ---- build chip groups ---- */
+document.querySelectorAll("[data-g]").forEach(box=>{
+  const g = box.dataset.g, t = box.dataset.type;
+  let h = box.dataset.opts.split("|").map(o=>`<label class="chip"><input type="${t}" name="${g}" value="${escA(o)}">${escA(o)}</label>`).join("");
+  if (box.dataset.other) h += `<input type="text" class="oth" id="${g}_o" placeholder="${escA(box.dataset.other)}">`;
+  box.innerHTML = h;
+});
+// timeline "Date" boxes open a calendar
+["shootDate_o","liveDate_o"].forEach(id=>{ const d=$(id); d.type="date"; d.title="Pick a date"; d.addEventListener("click", ()=>{ try{ d.showPicker(); }catch(e){} }); });
+const fmtDate = v => { const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(v); if (!m) return v; return new Date(+m[1], +m[2]-1, +m[3]).toLocaleDateString("en-GB",{day:"numeric",month:"short",year:"numeric"}); };
+document.querySelectorAll("input.oth").forEach(o=>o.addEventListener("input", ()=>{
+  if (o.value.trim()) form.querySelectorAll(`input[type=radio][name="${o.id.slice(0,-2)}"]`).forEach(r=>r.checked=false);
+}));
+form.addEventListener("change", e=>{
+  if (e.target.type==="radio"){ const o = $(e.target.name+"_o"); if (o) o.value=""; }
+});
+
+/* ---- deliverables: rows of quantity pickers ---- */
+const N10 = ["1","2","3","4","5","6","7","8","9","10","12","15","20","25","30"];
+const DROWS = [
+  {id:"phys",   label:"Physical", out:"Physical", items:[
+    {id:"pShoot", one:"shoot day", many:"shoot days", label:"Shoot days", qty:["Half day","1","1-2","2","3"]},
+    {id:"pHrs",   one:"hr/day", many:"hrs/day", label:"Shoot hours/day", qty:["4","6","8","10","12"]},
+    {id:"pVid",   one:"video", many:"videos", label:"Videos", qty:N10},
+    {id:"pStat",  one:"static image", many:"static images", label:"Static images", qty:N10}]},
+  {id:"ai",     label:"AI", out:"AI", items:[
+    {id:"aVid",   one:"video", many:"videos", label:"Videos", qty:N10},
+    {id:"aStat",  one:"static image", many:"static images", label:"Static images", qty:N10}]},
+  {id:"collab", label:"Collab", out:"Collab", items:[
+    {id:"cReel",  one:"reel", many:"reels", label:"Reels", qty:["1","2","3","4","5"]},
+    {id:"cStory", one:"story", many:"stories", label:"Stories", qty:["1","2","3","4","5","6","8","10"]}]}
+];
+$("items").innerHTML = DROWS.map(r=>`<div class="drow"><span class="dl">${r.label}</span>${r.items.map(it=>`<span class="qitem"><select id="q_${it.id}"><option value="">–</option>${it.qty.map(q=>`<option>${q}</option>`).join("")}${it.qty===N10?`<option value="__c">Custom…</option>`:""}</select>${it.qty===N10?`<input type="text" class="cust" id="c_${it.id}" placeholder="No." inputmode="numeric" style="display:none">`:""}${it.label}</span>`).join("")}</div>`).join("")
+  + `<div class="drow"><span class="dl">In-store</span><span class="opts" data-g="appear" data-type="radio" data-opts="Yes|No"></span></div>`;
+{ const box = document.querySelector('[data-g="appear"]'); box.innerHTML = ["Yes","No"].map(o=>`<label class="chip"><input type="radio" name="appear" value="${o}">${o}</label>`).join(""); }
+
+/* ---- budget dropdowns ---- */
+const buds = ["Open",1,2,3,5,8,10,12,15,18,20,25,30,40,50,60,70,75,80,90,100,150,200];
+["budMin","budMax"].forEach(id=>$(id).innerHTML = buds.map(v=>`<option value="${v}">${v==="Open"?"open":v}</option>`).join(""));
+
+/* ---- helpers ---- */
+const picks = g => [...form.querySelectorAll(`input[name="${g}"]:checked`)].map(i=>i.value);
+const pick = g => { const o = $(g+"_o"); return (o && o.value.trim()) || picks(g)[0] || ""; };
+const join = (a,w="&") => a.length<2 ? (a[0]||"") : a.slice(0,-1).join(", ")+` ${w} `+a[a.length-1];
+function compact(list){
+  const m = list.map(x=>x.match(/^(\d+)\s+(month|year)s?$/));
+  if (list.length>1 && m.every(Boolean) && m.every(x=>x[2]===m[0][2])) return join(m.map(x=>x[1]))+` ${m[0][2]}s`;
+  return join(list);
+}
+const rowParts = r => r.items.map(it=>{ let q=$("q_"+it.id).value; if (q==="__c"){ const c=$("c_"+it.id); q = c ? c.value.trim() : ""; } if(!q) return ""; return q==="Half day" ? "Half-day shoot" : `${q} ${q==="1"?it.one:it.many}`; }).filter(Boolean);
+
+/* ---- the lines ---- */
+function deliverables(){
+  const out = [];
+  DROWS.forEach(r=>{ const p = rowParts(r); if (p.length) out.push(`${r.out}: ${p.join(", ")}`); });
+  const a = picks("appear")[0]; if (a==="Yes") out.push(`In-store appearances: Yes`);
+  const ex = $("delExtra").value.trim(); if (ex) out.push(`Other: ${ex}`);
+  return out.length ? {head:"", subs:out} : null;
+}
+function age(){
+  const a = picks("age"); if (!a.length || a.includes("Open")) return "Open";
+  const lo = Math.min(...a.map(x=>parseInt(x))), hiv = a.map(x=>x.endsWith("+") ? null : +x.split("-")[1]);
+  return hiv.includes(null) ? `${lo}+` : `${lo}–${Math.max(...hiv)}`;
+}
+function gender(){ const g = picks("gender"); return g.length===2 ? "Male or Female" : (g[0] || "Any"); }
+function term(){
+  const t = picks("term"), a = picks("assoc"), subs = [];
+  if (t.length) subs.push(`Costing for: ${compact(t)}${t.length>1 ? " (please share each option)" : ""}`);
+  if (a.length) subs.push(`Overall duration: exploring ${compact(a)}`);
+  return subs.length ? {head:"", subs} : null;
+}
+function exclusivity(){
+  const r = picks("exReq")[0] || "Category exclusivity required", d = picks("exDur")[0] || "", c = $("exCost").checked;
+  if (r==="Not required") return "Not required";
+  const subs = [];
+  if (d) subs.push(`Duration: ${d==="Usage term" ? "Same as usage term" : d}`);
+  if (c) subs.push("Cost: Please share separately");
+  return subs.length ? {head: r, subs} : r;
+}
+function timelines(){
+  const s = pick("shootDate"), l = pick("liveDate"), subs = [];
+  if (s) subs.push(`Shoot: ${fmtDate(s)}`);
+  if (l) subs.push(`Posting / airing: ${fmtDate(l)}`);
+  return subs.length ? {head:"", subs} : null;
+}
+function budget(){
+  const mn=$("budMin").value, mx=$("budMax").value, u=picks("budUnit")[0]||"lakh";
+  let b;
+  if (mn!=="Open" && mx!=="Open"){ let a=+mn,c=+mx; if(a>c)[a,c]=[c,a]; b = a===c ? `₹${a} ${u}` : `₹${a}-${c} ${u}`; }
+  else if (mn!=="Open") b = `₹${mn} ${u}+`;
+  else if (mx!=="Open") b = `Up to ₹${mx} ${u}`;
+  else return "Open";
+  return b + ($("budGst").checked ? " + GST" : "");
+}
+function reference(){
+  const desc = [picks("tier")[0], join(picks("kind"),"or")].filter(Boolean).join(" ");
+  const names = $("names").value.split(/\n|,/).map(s=>s.replace(/^\s*\d+[.)]\s*/,"").trim()).filter(Boolean);
+  const subs = [];
+  if (desc) subs.push(`Type: ${desc}`);
+  if (names.length) subs.push(`Names: ${names.join(", ")}`);
+  return subs.length ? {head:"", subs} : "Open";
+}
+function shootCity(){ const l = pick("loc"); if (l) return l; return (!rowParts(DROWS[0]).length && rowParts(DROWS[1]).length) ? "Not applicable" : null; }
+
+function build(){
+  const rows = [
+    ["Brand name", $("brand").value.trim() || "—"],
+    ["Brand category", pick("category") || "—"],
+    ["Campaign medium", join(picks("medium")) || null],
+    ["Celeb age", age()],
+    ["Celeb gender", gender()],
+    ["Number of celebs needed", pick("count") || "1"],
+    ["Deliverables", deliverables()],
+    ["Usage term", term()],
+    ["Exclusivity", exclusivity()],
+    ["Timelines", timelines()],
+    ["Budget range", budget()],
+    ["Reference celebs / kind of names in mind", reference()],
+    ["Shoot city / location", shootCity()]
+  ].filter(r=>r[1]);
+  const fmt = v => typeof v === "string" ? " " + v : (v.head ? " " + v.head : "") + v.subs.map(s=>"\n     • " + s).join("");
+  return ["*Celeb Requirement Brief*", "", ...rows.map((r,i)=>`${i+1}. *${r[0]}:*${fmt(r[1])}`)].join("\n");
+}
+
+/* ---- render ---- */
+const esc = s => s.replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;");
+function render(){
+  document.querySelectorAll("input.cust").forEach(c=>{ c.style.display = $("q_"+c.id.slice(2)).value==="__c" ? "" : "none"; });
+  document.querySelectorAll(".qitem").forEach(el=>el.classList.toggle("on", !!el.querySelector("select").value));
+  const msg = build(), n = new Date();
+  $("bubble").innerHTML = esc(msg).replace(/\*([^*\n]+)\*/g,"<b>$1</b>") + `<span class="time">${String(n.getHours()).padStart(2,"0")}:${String(n.getMinutes()).padStart(2,"0")} ✓✓</span>`;
+  $("waBtn").href = "https://wa.me/?text=" + encodeURIComponent(msg);
+  save();
+}
+
+/* ---- state ---- */
+function snapshot(){
+  const d = {checked:[], sel:{}, text:{}};
+  form.querySelectorAll("input[type=checkbox],input[type=radio]").forEach(i=>{ if (i.checked) d.checked.push(i.id || i.name+"="+i.value); });
+  form.querySelectorAll("select[id]").forEach(s=>d.sel[s.id]=s.value);
+  form.querySelectorAll("input[type=text][id],input[type=date][id],textarea[id]").forEach(t=>d.text[t.id]=t.value);
+  return d;
+}
+function apply(d){
+  form.querySelectorAll("input[type=checkbox],input[type=radio]").forEach(i=>i.checked = (d.checked||[]).includes(i.id || i.name+"="+i.value));
+  form.querySelectorAll("select[id]").forEach(s=>{ if ((d.sel||{})[s.id]!==undefined) s.value = d.sel[s.id]; });
+  form.querySelectorAll("input[type=text][id],input[type=date][id],textarea[id]").forEach(t=>t.value = (d.text||{})[t.id]||"");
+  render();
+}
+const GIRIAS = {
+  checked:["category=Electronics & home appliances","medium=Only digital","age=Open","gender=Male","gender=Female","count=1",
+           "appear=Yes",
+           "term=1 month","term=3 months","term=6 months","assoc=6 months","assoc=1 year","assoc=2 years",
+           "exReq=Category exclusivity required","exCost",
+           "budUnit=lakh","tier=Prominent","kind=South Indian actor","kind=sportsperson"],
+  sel:{q_pShoot:"2",q_pVid:"4",q_pStat:"5",q_aVid:"2",q_aStat:"5",q_cReel:"1",q_cStory:"3",budMin:"70",budMax:"75"},
+  text:{brand:"Girias",names:"Rishab Shetty, Sania Mirza, KL Rahul, Sanju Samson, AB de Villiers, Yuvraj Singh, Anil Kumble, Shivarajkumar, Upendra, Prakash Raj, Prabhu Deva, Rakshit Shetty"}
+};
+const BLANK = {checked:["age=Open","gender=Male","gender=Female","count=1","exReq=Category exclusivity required","budUnit=lakh"],
+  sel:{budMin:"Open",budMax:"Open",q_pShoot:"",q_pHrs:"",q_pVid:"",q_pStat:"",q_aVid:"",q_aStat:"",q_cReel:"",q_cStory:""}, text:{}};
+const KEY = "celebBrief14_v5";
+function save(){ try{ localStorage.setItem(KEY, JSON.stringify(snapshot())); }catch(e){} }
+function restore(){ try{ const s = localStorage.getItem(KEY); if (s){ apply(JSON.parse(s)); return true; } }catch(e){} return false; }
+
+form.addEventListener("input", render);
+form.addEventListener("change", render);
+$("loadEx").onclick = ()=>{ apply(GIRIAS); flash("Girias example loaded"); };
+$("resetAll").onclick = ()=>{ apply(BLANK); flash("Fresh form — fill in your brief"); };
+$("copyBtn").onclick = async ()=>{
+  const msg = build();
+  try{ await navigator.clipboard.writeText(msg); flash("Copied — paste it into WhatsApp"); }
+  catch(e){
+    const ta=document.createElement("textarea"); ta.value=msg; document.body.appendChild(ta); ta.select();
+    let ok=false; try{ ok=document.execCommand("copy"); }catch(_){}
+    ta.remove(); flash(ok ? "Copied — paste it into WhatsApp" : "Couldn't copy — select the preview text and copy it");
+  }
+};
+let tm; function flash(m){ $("status").textContent=m; clearTimeout(tm); tm=setTimeout(()=>$("status").textContent="",2800); }
+
+if (!restore()) apply(GIRIAS);
+</script>
+</body>
+</html>
